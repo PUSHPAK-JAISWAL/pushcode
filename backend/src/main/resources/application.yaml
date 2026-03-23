@@ -1,3 +1,15 @@
 spring:
   application:
     name: backend
+
+execution:
+  timeout-seconds: 10
+  memory-limit: 256m
+  cpu-limit: 0.5
+
+docker:
+  images:
+    python: pushcode-python
+    c: pushcode-c
+    cpp: pushcode-cpp
+    java: pushcode-java

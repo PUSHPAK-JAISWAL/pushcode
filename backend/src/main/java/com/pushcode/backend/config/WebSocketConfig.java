@@ -1,5 +1,6 @@
 package com.pushcode.backend.config;
 
+import com.pushcode.backend.websocket.TerminalWebSocketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.*;

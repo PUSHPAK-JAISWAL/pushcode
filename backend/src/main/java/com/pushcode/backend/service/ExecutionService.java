@@ -4,6 +4,7 @@ import com.pushcode.backend.enums.Language;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -22,7 +23,7 @@ public class ExecutionService {
         this.timeOutManager = timeOutManager;
     }
 
-    public Process execute(Language language, String code, String sessionId) throws Exception {
+    public Process execute(Language language, String code, String sessionId) throws IOException {
 
         List<String> command = dockerCommandBuilder.build(language,code,sessionId);
 

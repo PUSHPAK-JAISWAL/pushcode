@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 
 @Component
@@ -26,8 +29,23 @@ public class TerminalWebSocketHandler extends TextWebSocketHandler {
         ExecutionSession exec = manager.get(sessionId);
         Process process = exec.getProcess();
 
-        new Thread(new StreamGobbler(process.getInputStream(), session)).start();
-        new Thread(new StreamGobbler(process.getErrorStream(), session)).start();
+        new Thread(() -> stream(process.getInputStream(), session, exec)).start();
+
+        new Thread(() -> stream(process.getErrorStream(), session, exec)).start();
+    }
+
+    private void stream(InputStream is, WebSocketSession ws, ExecutionSession exec) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+
+                exec.updateActivity(); // 🔥 IMPORTANT
+
+                ws.sendMessage(new TextMessage(line + "\n"));
+            }
+
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -35,17 +53,15 @@ public class TerminalWebSocketHandler extends TextWebSocketHandler {
 
         String sessionId = getSessionId(session);
 
-        Process process = manager.get(sessionId).getProcess();
+        ExecutionSession exec = manager.get(sessionId);
+        Process process = exec.getProcess();
+
+
+        exec.updateActivity();
 
         OutputStream os = process.getOutputStream();
         os.write(message.getPayload().getBytes());
         os.flush();
-    }
-
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        String sessionId = getSessionId(session);
-        manager.remove(sessionId);
     }
 
     private String getSessionId(WebSocketSession session) {

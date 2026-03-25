@@ -3,7 +3,8 @@ spring:
     name: backend
 
 execution:
-  timeout-seconds: 10
+  max-time-seconds: 10
+  idle-timeout-seconds: 15
   memory-limit: 256m
   cpu-limit: 0.5
 

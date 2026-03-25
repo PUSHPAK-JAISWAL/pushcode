@@ -2,7 +2,9 @@ package com.pushcode.backend.controller;
 
 import com.pushcode.backend.dto.ExecutionRequest;
 import com.pushcode.backend.dto.ExecutionResponse;
+import com.pushcode.backend.model.ExecutionSession;
 import com.pushcode.backend.service.ExecutionService;
+import com.pushcode.backend.service.TimeOutManager;
 import com.pushcode.backend.websocket.TerminalSessionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,29 +21,33 @@ public class ExecutionController {
 
     private final ExecutionService executionService;
     private final TerminalSessionManager terminalSessionManager;
+    private final TimeOutManager timeOutManager;
 
     @Autowired
     public ExecutionController(ExecutionService executionService,
-                               TerminalSessionManager terminalSessionManager) {
+                               TerminalSessionManager terminalSessionManager,
+                               TimeOutManager timeOutManager) {
         this.executionService = executionService;
         this.terminalSessionManager = terminalSessionManager;
+        this.timeOutManager = timeOutManager;
     }
 
     @PostMapping
-    public ExecutionResponse execute(@RequestBody ExecutionRequest executionRequest) throws IOException {
+    public ExecutionResponse execute(@RequestBody ExecutionRequest request) throws IOException {
 
         String sessionId = UUID.randomUUID().toString();
 
-        Process process = executionService.execute(
-                executionRequest.getLanguage(),
-                executionRequest.getCode(),
+        ExecutionSession session = executionService.execute(
+                request.getLanguage(),
+                request.getCode(),
                 sessionId
         );
 
-        terminalSessionManager.create(sessionId,process);
+        terminalSessionManager.create(sessionId, session.getProcess());
+
+        timeOutManager.monitor(session);
 
         return new ExecutionResponse(sessionId);
-
     }
 
 }

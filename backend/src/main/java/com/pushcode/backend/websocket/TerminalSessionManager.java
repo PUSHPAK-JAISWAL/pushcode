@@ -1,5 +1,6 @@
 package com.pushcode.backend.websocket;
 
+import com.pushcode.backend.exceptions.SessionNotFoundException;
 import com.pushcode.backend.model.ExecutionSession;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,13 @@ public class TerminalSessionManager {
     }
 
     public ExecutionSession get(String id) {
-        return sessions.get(id);
+        ExecutionSession session = sessions.get(id);
+
+        if (session == null) {
+            throw new SessionNotFoundException("Session not found: " + id);
+        }
+
+        return session;
     }
 
     public void remove(String id) {

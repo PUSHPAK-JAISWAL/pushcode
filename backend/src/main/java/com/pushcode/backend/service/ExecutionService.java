@@ -1,6 +1,7 @@
 package com.pushcode.backend.service;
 
 import com.pushcode.backend.enums.Language;
+import com.pushcode.backend.exceptions.ExecutionException;
 import com.pushcode.backend.model.ExecutionSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,12 +21,15 @@ public class ExecutionService {
         this.executor = executor;
     }
 
-    public ExecutionSession execute(Language lang, String code, String sessionId) throws IOException {
+    public ExecutionSession execute(Language lang, String code, String sessionId) throws ExecutionException {
 
-        List<String> command = builder.build(lang, code, sessionId);
+        try {
+            List<String> command = builder.build(lang, code, sessionId);
+            Process process = executor.start(command);
+            return new ExecutionSession(sessionId, process);
 
-        Process process = executor.start(command);
-
-        return new ExecutionSession(sessionId, process);
+        } catch (IOException e) {
+            throw new ExecutionException("Failed to start execution container");
+        }
     }
 }

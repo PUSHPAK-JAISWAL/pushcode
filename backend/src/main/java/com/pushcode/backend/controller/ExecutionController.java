@@ -2,6 +2,7 @@ package com.pushcode.backend.controller;
 
 import com.pushcode.backend.dto.ExecutionRequest;
 import com.pushcode.backend.dto.ExecutionResponse;
+import com.pushcode.backend.exceptions.ExecutionException;
 import com.pushcode.backend.model.ExecutionSession;
 import com.pushcode.backend.service.ExecutionService;
 import com.pushcode.backend.service.TimeOutManager;
@@ -33,7 +34,7 @@ public class ExecutionController {
     }
 
     @PostMapping
-    public ExecutionResponse execute(@RequestBody ExecutionRequest request) throws IOException {
+    public ExecutionResponse execute(@RequestBody ExecutionRequest request) throws IOException, ExecutionException {
 
         String sessionId = UUID.randomUUID().toString();
 

@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class TimeOutManager {
 
-    @Value("${execution.time-seconds}")
+    @Value("${execution.timeout-seconds}")
     private int timeout;
 
     public void applyTimeout(Process process) {

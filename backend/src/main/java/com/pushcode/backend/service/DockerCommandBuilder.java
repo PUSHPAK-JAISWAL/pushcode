@@ -15,16 +15,16 @@ public class DockerCommandBuilder {
     @Value("${execution.cpu-limit}")
     private String cpu;
 
-    @Value("${docker.image.python}")
+    @Value("${docker.images.python}")
     private String pythonImage;
 
-    @Value("${docker.image.c}")
+    @Value("${docker.images.c}")
     private String cImage;
 
-    @Value("${docker.image.cpp}")
+    @Value("${docker.images.cpp}")
     private String cppImage;
 
-    @Value("${docker.image.java}")
+    @Value("${docker.images.java}")
     private String javaImage;
 
     public List<String> build(Language lang,String code,String sessionId) {

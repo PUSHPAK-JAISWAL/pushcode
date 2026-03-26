@@ -1,8 +1,6 @@
 package com.pushcode.backend.websocket;
 
-import com.pushcode.backend.websocket.TerminalSessionManager;
 import com.pushcode.backend.model.ExecutionSession;
-import com.pushcode.backend.util.StreamGobbler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -65,7 +63,8 @@ public class TerminalWebSocketHandler extends TextWebSocketHandler {
 
         try {
             OutputStream os = process.getOutputStream();
-            os.write((message.getPayload()+"\n").getBytes());
+            // REMOVE the +"\n". Just send the raw payload.
+            os.write(message.getPayload().getBytes());
             os.flush();
         } catch (IOException e) {
             session.sendMessage(new TextMessage("\n[Input failed: process closed]\n"));

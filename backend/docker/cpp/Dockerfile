@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-RUN apk add --no-cache g++ musl-dev
+RUN apk add --no-cache g++ musl-dev coreutils
 
 RUN adduser -D runner
 

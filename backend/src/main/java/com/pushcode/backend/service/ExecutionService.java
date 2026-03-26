@@ -25,7 +25,6 @@ public class ExecutionService {
 
         try {
             List<String> command = builder.build(lang, code, sessionId);
-            System.out.println("Running command: " + command);
             Process process = executor.start(command);
             return new ExecutionSession(sessionId, process);
 

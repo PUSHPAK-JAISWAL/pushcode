@@ -12,4 +12,4 @@ if [ $? -ne 0 ]; then
 fi
 
 # Execute the binary
-exec /tmp/main.out
+exec stdbuf -o0 -e0 /tmp/main.out

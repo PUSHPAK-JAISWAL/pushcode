@@ -9,4 +9,4 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-exec /tmp/main.out
+exec stdbuf -o0 -e0 /tmp/main.out

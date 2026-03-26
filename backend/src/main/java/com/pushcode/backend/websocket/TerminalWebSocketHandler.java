@@ -7,10 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 
 @Component
 public class TerminalWebSocketHandler extends TextWebSocketHandler {
@@ -35,17 +32,21 @@ public class TerminalWebSocketHandler extends TextWebSocketHandler {
     }
 
     private void stream(InputStream is, WebSocketSession ws, ExecutionSession exec) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+        // Use a character buffer to catch partial output (like prompts)
+        try (InputStreamReader reader = new InputStreamReader(is)) {
+            char[] buffer = new char[1024];
+            int read;
+            while ((read = reader.read(buffer)) != -1) {
+                String output = new String(buffer, 0, read);
+                exec.updateActivity();
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-
-                exec.updateActivity(); // 🔥 IMPORTANT
-
-                ws.sendMessage(new TextMessage(line + "\n"));
+                if (ws.isOpen()) {
+                    ws.sendMessage(new TextMessage(output));
+                }
             }
-
-        } catch (Exception ignored) {}
+        } catch (Exception e) {
+            // Process ended or socket closed
+        }
     }
 
     @Override
@@ -56,12 +57,19 @@ public class TerminalWebSocketHandler extends TextWebSocketHandler {
         ExecutionSession exec = manager.get(sessionId);
         Process process = exec.getProcess();
 
+        // 🔥 CHECK IF PROCESS IS ALIVE
+        if (!process.isAlive()) {
+            session.sendMessage(new TextMessage("\n[Process already terminated]\n"));
+            return;
+        }
 
-        exec.updateActivity();
-
-        OutputStream os = process.getOutputStream();
-        os.write(message.getPayload().getBytes());
-        os.flush();
+        try {
+            OutputStream os = process.getOutputStream();
+            os.write((message.getPayload()+"\n").getBytes());
+            os.flush();
+        } catch (IOException e) {
+            session.sendMessage(new TextMessage("\n[Input failed: process closed]\n"));
+        }
     }
 
     private String getSessionId(WebSocketSession session) {

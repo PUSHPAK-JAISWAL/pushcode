@@ -4,6 +4,7 @@ import com.pushcode.backend.enums.Language;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Base64;
 import java.util.List;
 
 @Component
@@ -36,16 +37,22 @@ public class DockerCommandBuilder {
             case CPP -> cppImage;
         };
 
+        String encodedCode = Base64.getEncoder().encodeToString(code.getBytes());
+
         return List.of(
-                "docker","run","--rm","-i",
-                "--network","none",
-                "--memory",memory,
-                "--cpus",cpu,
-                "--pids-limit","64",
+                "docker", "run", "--rm", "-i",
+                "--network", "none",
+                "--memory", memory,
+                "--cpus", cpu,
+                "--pids-limit", "64",
                 "--read-only",
-                "--security-opt","no-new-privileges",
-                "-e","CODE=" + code,
-                "--name","exec-"+sessionId,
+
+                "--tmpfs", "/tmp:rw,exec,size=64m",
+                "--security-opt", "no-new-privileges",
+                "-e", "CODE=" + encodedCode,
+                "-e", "PYTHONUNBUFFERED=1", // Fixes Python lag
+                "-e", "TERM=dumb",         // Fixes "Not a TTY" warnings
+                "--name", "exec-" + sessionId,
                 image
         );
 

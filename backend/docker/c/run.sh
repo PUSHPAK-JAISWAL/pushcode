@@ -1,15 +1,15 @@
 #!/bin/sh
 
-mkdir -p /tmp/code
-cd /tmp/code
+# Decode the code into /tmp
+echo "$CODE" | base64 -d > /tmp/main.c
 
-printf "%s" "$CODE" > main.c
-
-gcc main.c -o main.out 2> compile_error.txt
+# Compile: 2>&1 sends compiler errors directly to your WebSocket
+gcc /tmp/main.c -o /tmp/main.out 2>&1
 
 if [ $? -ne 0 ]; then
-    cat compile_error.txt
+    # Exit if compilation failed (errors already sent to stdout)
     exit 1
 fi
 
-exec ./main.out
+# Execute the binary
+exec /tmp/main.out

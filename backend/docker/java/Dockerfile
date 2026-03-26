@@ -9,4 +9,4 @@ RUN chmod +x /run.sh
 
 USER runner
 
-ENTRYPOINT ["/run.sh"]
+ENTRYPOINT ["/bin/sh", "/run.sh"]

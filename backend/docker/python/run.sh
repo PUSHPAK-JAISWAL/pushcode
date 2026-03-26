@@ -1,11 +1,6 @@
 #!/bin/sh
 
-#create temp working dir
-mkdir -p /tmp/code
-cd /tmp/code
+echo "$CODE" | base64 -d > /tmp/main.py
 
-#write code safely
-printf "%s" "$CODE" > main.py
-
-#execute
-exec python3 main.py
+# -u forces stdin, stdout, and stderr to be totally unbuffered
+exec python3 -u /tmp/main.py

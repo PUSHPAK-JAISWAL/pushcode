@@ -1,0 +1,38 @@
+services:
+  backend:
+    build:
+      context: .
+    container_name: pushcode-backend
+    user: root
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - EXECUTION_MAX_TIME_SECONDS=30
+      # Ensure these match your @Value keys in DockerCommandBuilder
+      - EXECUTION_MEMORY_LIMIT=256m
+      - EXECUTION_CPU_LIMIT=0.5
+      - DOCKER_IMAGES_JAVA=pushcode-java
+      - DOCKER_IMAGES_PYTHON=pushcode-python
+      - DOCKER_IMAGES_C=pushcode-c
+      - DOCKER_IMAGES_CPP=pushcode-cpp
+    depends_on:
+      build-images:
+        condition: service_completed_successfully
+
+  build-images:
+    image: docker:24.0.7-cli
+    container_name: pushcode-image-builder
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker:/docker
+    working_dir: /docker
+    entrypoint: >
+      sh -c "
+      docker build -t pushcode-java ./java &&
+      docker build -t pushcode-python ./python &&
+      docker build -t pushcode-c ./c &&
+      docker build -t pushcode-cpp ./cpp
+      "

@@ -1,15 +1,12 @@
 #!/bin/sh
 
-mkdir -p /tmp/code
-cd /tmp/code
+echo "$CODE" | base64 -d > /tmp/main.cpp
 
-printf "%s" "$CODE" > main.cpp
-
-g++ main.cpp -o main.out 2> compile_error.txt
+# Compile: 2>&1 merges stderr into stdout for the terminal to see
+g++ /tmp/main.cpp -o /tmp/main.out 2>&1
 
 if [ $? -ne 0 ]; then
-    cat compile_error.txt
     exit 1
 fi
 
-exec ./main.out
+exec /tmp/main.out
